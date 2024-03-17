@@ -14,17 +14,18 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+ARG BUILD_FROM
+#FROM python:3.10.13-alpine3.18 as builder
+FROM $BUILD_FROM
 
-FROM python:3.10.13-alpine3.18 as builder
-
-WORKDIR /build
-RUN apk add gcc alpine-sdk
+RUN apk add gcc alpine-sdk python3 py3-pip python3-dev
 COPY requirements.txt ./
-RUN pip install --no-cache-dir --target . -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-FROM python:3.10.13-alpine3.18
-WORKDIR /opt/deye_inverter_mqtt
-ADD src/*.py ./
-COPY --from=builder /build/ ./
+WORKDIR /
+ADD src/*.py /
+ADD run.sh /
+RUN chmod a+x /run.sh
 
-ENTRYPOINT [ "python", "./deye_docker_entrypoint.py" ]
+#ENTRYPOINT [ "python", "./deye_docker_entrypoint.py" ]
+CMD ["./run.sh"]
